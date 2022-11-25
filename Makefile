@@ -22,8 +22,8 @@ test: test-rs test-as
 # Helper to execute a rust given test using specified runtime
 RS_TEST_DIR?=target/wasm32-wasi/debug
 
-$(RS_TEST_DIR)/test-%.wasm: hal_rs/tests/test_%.rs $(wildcard ./hal_rs/src/*.rs)
-	cd hal_rs && cargo build --features=$(subst .rs,,$(subst hal_rs/tests/,,$<))
+$(RS_TEST_DIR)/test-%.wasm: hal_rs/src/tests/test_%.rs $(wildcard ./hal_rs/src/*.rs)
+	cd hal_rs && cargo build --features=$(subst .rs,,$(subst hal_rs/src/tests/,,$<))
 
 test-rs-%: $(RS_TEST_DIR)/test-%.wasm
 	@echo "----------- $(RUNTIME_EXEC)/$@ (config: $(subst test-rs-,,$@).toml) -----------"

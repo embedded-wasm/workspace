@@ -29,7 +29,7 @@ jobs:
     - name: Configure toolchain
       uses: actions-rs/toolchain@v1
       with:
-        toolchain: nightly-2021-11-01
+        toolchain: nightly
         target:  x86_64-unknown-linux-gnu
         override: true
         components: rustfmt, clippy
@@ -79,7 +79,7 @@ jobs:
     - name: Configure toolchain
       uses: actions-rs/toolchain@v1
       with:
-        toolchain: nightly-2021-11-01
+        toolchain: nightly
         target:  x86_64-unknown-linux-gnu
         override: true
         components: rustfmt, clippy
@@ -131,6 +131,9 @@ jobs:
       with:
         node-version: '19'
         cache-dependency-path: hal_as/package-lock.json
+
+    - name: Setup dependencies
+      run: cd hal_as && npm install
   
     - name: Asc build
       run: cd hal_as && make tests
