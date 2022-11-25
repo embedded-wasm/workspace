@@ -6,7 +6,7 @@
 members = [
     "rt",
     "rt_wasm3",     
-    #"rt_wasmtime",
+    "rt_wasmtime",
     "hal_rs",
 ]
 
@@ -15,9 +15,6 @@ exclude = [
     "spec",
     # hal_as doesn't contain a Cargo.toml
     "hal_as",
-    # rt_wasm3 per above
-    #"rt_wasm3",
-    "rt_wasmtime",
 ]
 
 [patch.crates-io]

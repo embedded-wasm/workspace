@@ -1,0 +1,168 @@
+name: ci
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+
+  # Build linux runtime for running tests
+  build_runtime:
+    name: Build Runtime
+    runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+  
+    - uses: FranzDiebold/github-env-vars-action@v1.2.1
+
+    - name: Configure toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: nightly-2021-11-01
+        target:  x86_64-unknown-linux-gnu
+        override: true
+        components: rustfmt, clippy
+
+    - name: Setup caching
+      uses: actions/cache@v2
+      with:
+        key: rt-${{ matrix.os }}-${{ matrix.target }}
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target/${{ matrix.target }}
+
+    - name: Install libclang for bindgen
+      if: ${{ matrix.os == 'ubuntu-latest'}}
+      run: |
+        sudo apt install libclang-dev
+  
+    - name: Cargo build
+      uses: actions-rs/cargo@v1
+      with:
+        use-cross: ${{ matrix.use_cross }}
+        command: build
+        args: --package wasm-embedded-rt
+
+    - name: Upload runtime artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: rt
+        path: target/debug/wasm-embedded-rt
+
+  # Build Rust HAL tests
+  build_hal_rs:
+    name: Build Rust HAL tests
+    runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+  
+    - uses: FranzDiebold/github-env-vars-action@v1.2.1
+
+    - name: Configure toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: nightly-2021-11-01
+        target:  x86_64-unknown-linux-gnu
+        override: true
+        components: rustfmt, clippy
+
+    - name: Setup caching
+      uses: actions/cache@v2
+      with:
+        key: rt-${{ matrix.os }}-${{ matrix.target }}
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target/${{ matrix.target }}
+
+    - name: Install libclang for bindgen
+      if: ${{ matrix.os == 'ubuntu-latest'}}
+      run: |
+        sudo apt install libclang-dev
+  
+    - name: Cargo build
+      uses: actions-rs/cargo@v1
+      with:
+        use-cross: ${{ matrix.use_cross }}
+        command: build
+        args: --package wasm-embedded-hal --features=tests
+
+    - name: Upload test artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: tests-rs
+        path: target/wasm32-wasi/debug/test-*.wasi
+
+  # Build AssemblyScript HAL tests
+  build_hal_as:
+    name: Build AssemblyScript HAL tests
+    runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+  
+    - uses: FranzDiebold/github-env-vars-action@v1.2.1
+
+    - name: Configure toolchain
+      uses: actions/setup-node@v2
+      with:
+        node-version: '19'
+        cache-dependency-path: hal_as/package-lock.json
+  
+    - name: Asc build
+      run: cd hal_as && make tests
+
+    - name: Upload test artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: tests-as
+        path: hal_as/build/test-*.wasi
+
+  # Run tests from prior steps
+  run_tests:
+    name: Run HAL tests
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    needs: [ build_runtime, build_hal_rs, build_hal_as ]
+
+    strategy:
+      fail-fast: false
+      matrix:
+        runtimes: [ wasm3, wasmtime ]
+        tests: [ gpio, i2c, spi ]
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+  
+    - uses: FranzDiebold/github-env-vars-action@v1.2.1
+
+    - name: Download test artifacts
+      uses: actions/download-artifact@v3
+
+    - name: Display structure of downloaded files
+      run: ls -R
