@@ -171,12 +171,16 @@ jobs:
         name: rt
         path: bins/
 
-    
     - name: Download test artifacts
       uses: actions/download-artifact@v3
       with:
         name: tests-${{ matrix.hal }}
         path: bins/
 
-    - name: Display structure of downloaded files
-      run: ls -R
+    - name: Run test
+      run: >
+        ./bins/wasm-embedded-rt
+        --engine=mock
+        --runtime=${{ matrix.runtime }}
+        --config=spec/tests/${{ matrix.test }}.toml
+        ./bins/test-${{ matrix.test }}.wasm
