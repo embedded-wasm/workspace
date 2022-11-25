@@ -109,7 +109,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: tests-rs
-        path: target/wasm32-wasi/debug/test-*.wasi
+        path: target/wasm32-wasi/debug/test-*.wasm
 
   # Build AssemblyScript HAL tests
   build_hal_as:
@@ -142,7 +142,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: tests-as
-        path: hal_as/build/test-*.wasi
+        path: hal_as/build/test-*.wasm
 
   # Run tests from prior steps
   run_tests:
@@ -154,8 +154,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runtimes: [ wasm3, wasmtime ]
-        tests: [ gpio, i2c, spi ]
+        runtime: [ wasm3, wasmtime ]
+        test: [ gpio, i2c, spi ]
+        hal: [ rs, as ]
 
     steps:
     - uses: actions/checkout@v2
@@ -164,8 +165,18 @@ jobs:
   
     - uses: FranzDiebold/github-env-vars-action@v1.2.1
 
+    - name: Download runtime artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: rt
+        path: bins/
+
+    
     - name: Download test artifacts
       uses: actions/download-artifact@v3
+      with:
+        name: tests-${{ matrix.hal }}
+        path: bins/
 
     - name: Display structure of downloaded files
       run: ls -R
