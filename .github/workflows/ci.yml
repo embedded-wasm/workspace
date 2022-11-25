@@ -176,6 +176,9 @@ jobs:
       with:
         name: tests-${{ matrix.hal }}
         path: bins/
+    
+    - name: Fix execute permissions
+      run: chmod +x bins/wasm-embedded-rt
 
     - name: Run test
       run: >
