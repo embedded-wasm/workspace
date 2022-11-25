@@ -1,0 +1,21 @@
+[submodule "rt_wasm3"]
+	path = rt_wasm3
+	url = ../rt_wasm3
+[submodule "rt_wasmtime"]
+	path = rt_wasmtime
+	url = ../rt_wasmtime
+[submodule "book"]
+	path = book
+	url = ../book
+[submodule "hal_as"]
+	path = hal_as
+	url = ../hal_as
+[submodule "hal_rs"]
+	path = hal_rs
+	url = ../hal_rs
+[submodule "spec"]
+	path = spec
+	url = ../spec
+[submodule "rt"]
+	path = rt
+	url = ../rt

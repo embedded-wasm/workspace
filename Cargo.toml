@@ -1,0 +1,26 @@
+[workspace]
+
+# Note that _if_ rt_wasm3 is included in the workspace 
+# this _must_ also be patched to avoid duplication of the library
+
+members = [
+    "rt",
+    "rt_wasm3",     
+    #"rt_wasmtime",
+    "hal_rs",
+]
+
+exclude = [
+    # spec must be excluded to avoid breaking wiggle path
+    "spec",
+    # hal_as doesn't contain a Cargo.toml
+    "hal_as",
+    # rt_wasm3 per above
+    #"rt_wasm3",
+    "rt_wasmtime",
+]
+
+[patch.crates-io]
+wasm-embedded-spec = { path = "./spec" }
+wasm-embedded-rt-wasm3 = { path = "./rt_wasm3" }
+wasm-embedded-rt-wasmtime = { path = "./rt_wasmtime" }
