@@ -8,6 +8,9 @@ RUNTIME_EXEC?=wasmtime
 # Build test list
 TESTS=$(foreach f,$(wildcard ./spec/tests/*.toml),$(subst .toml,,$(subst ./spec/tests/,,$(f))))
 
+# Build everything
+all: runtime build-rs-tests build-as-tests
+
 
 # Build the linux runtime
 runtime:
@@ -33,6 +36,8 @@ test-rs-%: $(RS_TEST_DIR)/test-%.wasm
 # Run all rust tests
 test-rs: $(foreach f,$(TESTS),test-rs-$(f))
 
+# Build all rust tests
+build-rs-tests: $(foreach f,$(TESTS),$(RS_TEST_DIR)/test-$(f).wasm)
 
 ### AssemblyScript Tests ###
 
@@ -55,3 +60,6 @@ test-as-%: hal_as/build/test-%.wasm
 
 # Run all assemblyscript tests
 test-as: $(foreach f,$(TESTS),test-as-$(f))
+
+# Build all assemblyscript tests
+build-as-tests: $(foreach f,$(TESTS),hal_as/build/test-$(f).wasm)
