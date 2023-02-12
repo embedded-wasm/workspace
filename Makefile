@@ -31,7 +31,9 @@ $(RS_TEST_DIR)/test-%.wasm: hal_rs/src/tests/test_%.rs $(wildcard ./hal_rs/src/*
 test-rs-%: $(RS_TEST_DIR)/test-%.wasm
 	@echo "----------- $(RUNTIME_EXEC)/$@ (config: $(subst test-rs-,,$@).toml) -----------"
 	
-	$(RUNTIME_DIR)/wasm-embedded-rt --engine mock --runtime $(RUNTIME_EXEC) $(RS_TEST_DIR)/$(subst test-rs-,test-,$@).wasm --config ./spec/tests/$(subst test-rs-,,$@).toml
+	$(RUNTIME_DIR)/wasm-embedded-rt --engine mock --runtime $(RUNTIME_EXEC) \
+	--config ./spec/tests/$(subst test-rs-,,$@).toml \
+	$(RS_TEST_DIR)/$(subst test-rs-,test-,$@).wasm
 
 # Run all rust tests
 test-rs: $(foreach f,$(TESTS),test-rs-$(f))
@@ -56,10 +58,14 @@ test-as-%: hal_as/build/test-%.wasm
 	@echo "Running $@ (config: $(subst test-as-,,$@).toml)"
 	
 	@echo ----------- wasmtime -----------
-	$(RUNTIME_DIR)/wasm-embedded-rt --engine mock --runtime $(RUNTIME_EXEC) $(AS_TEST_DIR)/$(subst test-as-,test-,$@).wasm --config ./spec/tests/$(subst test-as-,,$@).toml
+	$(RUNTIME_DIR)/wasm-embedded-rt --engine mock --runtime $(RUNTIME_EXEC) \
+	--config ./spec/tests/$(subst test-as-,,$@).toml \
+	$(AS_TEST_DIR)/$(subst test-as-,test-,$@).wasm 
 
 # Run all assemblyscript tests
 test-as: $(foreach f,$(TESTS),test-as-$(f))
 
 # Build all assemblyscript tests
 build-as-tests: $(foreach f,$(TESTS),hal_as/build/test-$(f).wasm)
+
+.PHONY: build-rs-tests build-as-tests
